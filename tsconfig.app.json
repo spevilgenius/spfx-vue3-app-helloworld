@@ -1,12 +1,23 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.ts", "src/**/*.vue", "src/components/*.vue", "src/**/*.js"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-
+    "module": "ESNext",
+    "composite": true,
+    "strict": false,
+    "allowJs": true,
+    "noImplicitThis": true,
+    "noImplicitAny": false,
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"]
+    },
+    "types": [
+      "@pnp/sp",
+      "@pnp/graph"
+    ],
+    "noEmit": false,
+    "verbatimModuleSyntax": false,
   }
 }
