@@ -10,11 +10,11 @@ Log "Building BASE Widget..."
 
 npm run build
 
-$SiteURL = "URL"
-$FilesPathA = "C:\Repos\BASE-Widget\dist\css"
-$FilesPathB = "C:\Repos\BASE-Widget\dist\js"
-$ServerRelativePathA = "/SiteAssets/css"
-$ServerRelativePathB = "/SiteAssets/js"
+$SiteURL = "https://legodan.sharepoint.com/sites/LegoTeam"
+$FilesPathA = "D:\Repos\spfx-vue3-app-helloworld\dist\css"
+$FilesPathB = "D:\Repos\spfx-vue3-app-helloworld\dist\js"
+$ServerRelativePathA = "/sites/LegoTeam/SiteAssets/css"
+$ServerRelativePathB = "/sites/LegoTeam/SiteAssets/js"
 
 Connect-PnPOnline -Url $SiteURL -Interactive -Verbose
 
