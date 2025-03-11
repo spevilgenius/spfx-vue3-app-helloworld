@@ -32,8 +32,9 @@ ForEach ($File in $Files) {
     Add-PnPFile -Path "$($File.Directory)\$($File.Name)" -Folder $ServerRelativePathB -Values @{"Title" = $($File.Name) }
 }
 
-Log "Done. Clearing Screen in 15 seconds..."
+Log "Done."
+<# Log "Clearing Screen in 15 seconds..."
 Start-Sleep -Seconds 15
-Clear-Host
+Clear-Host #>
 $today = Get-Date
 Write-Host -f Green "Project Built and Uploaded: `t$today"
