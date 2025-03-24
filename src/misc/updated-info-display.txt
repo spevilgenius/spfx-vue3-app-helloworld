@@ -1,0 +1,262 @@
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue';
+import SimpleThemeControls from './SimpleThemeControls.vue';
+
+interface InfoDisplayProps {
+  title: string;
+  description: string;
+  items: Array<{
+    id: number;
+    name: string;
+    value: string;
+  }>;
+  onItemSelected?: (itemId: number) => void;
+}
+
+// Define props with validation
+const props = withDefaults(defineProps<InfoDisplayProps>(), {
+  title: 'Default Title',
+  description: 'Default description text',
+  items: () => [],
+});
+
+// Define emits for Vue 3
+const emit = defineEmits<{
+  (e: 'update:title', value: string): void;
+  (e: 'itemSelected', itemId: number): void;
+}>();
+
+// Reactive state
+const selectedItemId = ref<number | null>(null);
+const searchQuery = ref('');
+const filteredItems = ref(props.items);
+
+// Methods
+const selectItem = (itemId: number) => {
+  selectedItemId.value = itemId;
+  emit('itemSelected', itemId);
+  
+  // If callback is provided, call it
+  if (props.onItemSelected) {
+    props.onItemSelected(itemId);
+  }
+};
+
+const updateTitle = (newTitle: string) => {
+  emit('update:title', newTitle);
+};
+
+// Watch for changes in items prop
+watch(() => props.items, (newItems) => {
+  applyFilter();
+}, { deep: true });
+
+// Watch for changes in search query
+watch(searchQuery, () => {
+  applyFilter();
+});
+
+const applyFilter = () => {
+  if (!searchQuery.value) {
+    filteredItems.value = [...props.items];
+    return;
+  }
+  
+  const query = searchQuery.value.toLowerCase();
+  filteredItems.value = props.items.filter(item => 
+    item.name.toLowerCase().includes(query) || 
+    item.value.toLowerCase().includes(query)
+  );
+};
+
+// Initialize component
+onMounted(() => {
+  console.log('InfoDisplay component mounted');
+  applyFilter();
+});
+</script>
+
+<template>
+  <div class="info-display">
+    <div class="info-display-header">
+      <h2>{{ title }}</h2>
+      <div class="header-controls">
+        <!-- Theme Controls -->
+        <SimpleThemeControls />
+        
+        <!-- Search Input -->
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Search items..." 
+          class="search-input"
+        />
+      </div>
+    </div>
+    
+    <div class="info-display-description">
+      <p>{{ description }}</p>
+    </div>
+    
+    <div class="info-display-items">
+      <div 
+        v-for="item in filteredItems" 
+        :key="item.id"
+        class="info-item"
+        :class="{ 'selected': selectedItemId === item.id }"
+        @click="selectItem(item.id)"
+      >
+        <div class="item-name">{{ item.name }}</div>
+        <div class="item-value">{{ item.value }}</div>
+      </div>
+      
+      <div v-if="filteredItems.length === 0" class="no-results">
+        No items match your search criteria
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.info-display {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--surface-50, #f9f9f9);
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+:global(.p-dark) .info-display {
+  background-color: var(--surface-900, #212529);
+  color: var(--surface-50, #f8f9fa);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.info-display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.info-display-header h2 {
+  margin: 0;
+  color: var(--primary-700, #005a9e);
+  transition: color 0.3s ease;
+}
+
+:global(.p-dark) .info-display-header h2 {
+  color: var(--primary-300, #6cb8f6);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid var(--surface-300, #dee2e6);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: var(--surface-0, #ffffff);
+  color: var(--surface-900, #212529);
+  transition: all 0.2s ease;
+}
+
+:global(.p-dark) .search-input {
+  background-color: var(--surface-800, #343a40);
+  border-color: var(--surface-700, #495057);
+  color: var(--surface-100, #f8f9fa);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-500, #0078d4);
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.info-display-description {
+  margin-bottom: 20px;
+  color: var(--surface-700, #495057);
+  transition: color 0.3s ease;
+}
+
+:global(.p-dark) .info-display-description {
+  color: var(--surface-300, #dee2e6);
+}
+
+.info-display-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: var(--surface-0, #ffffff);
+  border-radius: 4px;
+  border-left: 3px solid var(--primary-500, #0078d4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background-color: var(--surface-100, #f8f9fa);
+  transform: translateX(2px);
+}
+
+:global(.p-dark) .info-item {
+  background-color: var(--surface-800, #343a40);
+  border-left-color: var(--primary-600, #0062ad);
+}
+
+:global(.p-dark) .info-item:hover {
+  background-color: var(--surface-700, #495057);
+}
+
+.info-item.selected {
+  background-color: var(--primary-50, #e6f7ff);
+  border-left-color: var(--primary-600, #0062ad);
+}
+
+:global(.p-dark) .info-item.selected {
+  background-color: var(--primary-900, #00457a);
+  border-left-color: var(--primary-400, #4296eb);
+}
+
+.item-name {
+  font-weight: 500;
+  color: var(--surface-900, #212529);
+  transition: color 0.3s ease;
+}
+
+:global(.p-dark) .item-name {
+  color: var(--surface-50, #f8f9fa);
+}
+
+.item-value {
+  color: var(--surface-600, #6c757d);
+  transition: color 0.3s ease;
+}
+
+:global(.p-dark) .item-value {
+  color: var(--surface-400, #ced4da);
+}
+
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: var(--surface-600, #6c757d);
+  font-style: italic;
+  transition: color 0.3s ease;
+}
+
+:global(.p-dark) .no-results {
+  color: var(--surface-400, #ced4da);
+}
+</style>

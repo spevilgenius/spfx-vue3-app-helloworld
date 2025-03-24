@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, defineProps } from 'vue'
 import SPFxConfig from './interfaces/SPFxConfig'
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+/* import { RouterLink, RouterView } from 'vue-router' */
+/* import HelloWorld from './components/HelloWorld.vue' */
 
 const props = defineProps<SPFxConfig>()
 

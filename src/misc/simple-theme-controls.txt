@@ -1,0 +1,328 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { 
+  applySharePointTheme, 
+  applyTailwindTheme, 
+  getSharePointThemes, 
+  getTailwindThemes, 
+  toggleDarkMode 
+} from '../utils/sharePointThemeAdapter';
+
+// Component state
+const showPanel = ref(false);
+const isDarkMode = ref(false);
+const selectedTheme = ref('themeBlue'); // Default theme
+
+// Get available themes
+const spThemes = getSharePointThemes();
+const tailwindThemes = getTailwindThemes();
+
+// Theme display information
+const themeDisplayInfo = {
+  'themeBlue': { name: 'Blue', color: '#0078d4' },
+  'themeDarkBlue': { name: 'Dark Blue', color: '#004578' },
+  'themeGreen': { name: 'Green', color: '#107c10' },
+  'themeDarkGreen': { name: 'Dark Green', color: '#0b4419' },
+  'themeRed': { name: 'Red', color: '#d13438' },
+  'themeDarkRed': { name: 'Dark Red', color: '#931834' },
+  'themeYellow': { name: 'Yellow', color: '#ffb900' },
+  'themeDarkYellow': { name: 'Dark Yellow', color: '#d29200' },
+  'themeTeal': { name: 'Teal', color: '#008272' },
+  'themeDarkTeal': { name: 'Dark Teal', color: '#005e50' },
+  'themePurple': { name: 'Purple', color: '#5c2d91' },
+  'themeDarkPurple': { name: 'Dark Purple', color: '#401b6c' },
+  'themeOrange': { name: 'Orange', color: '#d18d1f' },
+  'themeDarkOrange': { name: 'Dark Orange', color: '#a55918' },
+  // Tailwind themes
+  'blue': { name: 'Blue', color: '#3b82f6' },
+  'indigo': { name: 'Indigo', color: '#6366f1' },
+  'purple': { name: 'Purple', color: '#8b5cf6' },
+  'emerald': { name: 'Emerald', color: '#10b981' },
+  'teal': { name: 'Teal', color: '#14b8a6' },
+  'amber': { name: 'Amber', color: '#f59e0b' },
+  'orange': { name: 'Orange', color: '#f97316' },
+  'rose': { name: 'Rose', color: '#f43f5e' }
+};
+
+// Get theme display information
+function getThemeInfo(themeKey) {
+  return themeDisplayInfo[themeKey] || { name: themeKey, color: '#cccccc' };
+}
+
+// Toggle theme panel visibility
+function togglePanel() {
+  showPanel.value = !showPanel.value;
+}
+
+// Toggle dark mode
+function handleToggleDarkMode() {
+  isDarkMode.value = !isDarkMode.value;
+  toggleDarkMode(isDarkMode.value);
+  
+  // Re-apply current theme to update for dark mode
+  applyCurrentTheme();
+}
+
+// Apply a theme
+function applyTheme(themeName) {
+  selectedTheme.value = themeName;
+  applyCurrentTheme();
+}
+
+// Apply the currently selected theme
+function applyCurrentTheme() {
+  // Determine if it's a SharePoint theme or Tailwind theme
+  if (spThemes.includes(selectedTheme.value)) {
+    applySharePointTheme(selectedTheme.value);
+  } else {
+    applyTailwindTheme(selectedTheme.value, isDarkMode.value);
+  }
+}
+
+// Initialize on mount
+onMounted(() => {
+  // Apply default theme
+  applyCurrentTheme();
+});
+</script>
+
+<template>
+  <div class="theme-controls relative">
+    <!-- Theme Toggle Buttons -->
+    <div class="flex items-center space-x-2">
+      <!-- Dark Mode Toggle -->
+      <button 
+        type="button"
+        class="theme-btn"
+        @click="handleToggleDarkMode"
+        :title="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      >
+        <i :class="['pi', isDarkMode ? 'pi-sun' : 'pi-moon']"></i>
+      </button>
+      
+      <!-- Theme Panel Toggle -->
+      <button 
+        type="button"
+        class="theme-btn"
+        @click="togglePanel"
+        title="Theme Settings"
+      >
+        <i class="pi pi-palette"></i>
+      </button>
+    </div>
+    
+    <!-- Theme Panel -->
+    <div 
+      v-if="showPanel" 
+      class="theme-panel"
+    >
+      <!-- SharePoint Themes Section -->
+      <div class="panel-section">
+        <h4>SharePoint Themes</h4>
+        <div class="theme-grid">
+          <button
+            v-for="theme in spThemes"
+            :key="theme"
+            type="button"
+            class="theme-button"
+            :class="{ 'selected': selectedTheme === theme }"
+            :style="{ backgroundColor: getThemeInfo(theme).color }"
+            :title="getThemeInfo(theme).name"
+            @click="applyTheme(theme)"
+          >
+            <span v-if="selectedTheme === theme" class="check-icon">
+              <i class="pi pi-check"></i>
+            </span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tailwind Themes Section -->
+      <div class="panel-section">
+        <h4>Tailwind Colors</h4>
+        <div class="theme-grid">
+          <button
+            v-for="theme in tailwindThemes"
+            :key="theme"
+            type="button"
+            class="theme-button"
+            :class="{ 'selected': selectedTheme === theme }"
+            :style="{ backgroundColor: getThemeInfo(theme).color }"
+            :title="getThemeInfo(theme).name"
+            @click="applyTheme(theme)"
+          >
+            <span v-if="selectedTheme === theme" class="check-icon">
+              <i class="pi pi-check"></i>
+            </span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Dark Mode Toggle -->
+      <div class="mode-toggle">
+        <span>Light</span>
+        <button 
+          type="button"
+          class="toggle-switch"
+          :class="{ 'on': isDarkMode }"
+          @click="handleToggleDarkMode"
+        >
+          <span class="toggle-handle"></span>
+        </button>
+        <span>Dark</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.theme-controls {
+  display: inline-flex;
+  position: relative;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--surface-100, #f8f9fa);
+  border: none;
+  color: var(--surface-700, #495057);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:global(.p-dark) .theme-btn {
+  background-color: var(--surface-800, #343a40);
+  color: var(--surface-200, #e9ecef);
+}
+
+.theme-btn:hover {
+  background-color: var(--primary-100, #e6f7ff);
+  color: var(--primary-600, #0078d4);
+}
+
+:global(.p-dark) .theme-btn:hover {
+  background-color: var(--primary-900, #00457a);
+  color: var(--primary-300, #73bcf7);
+}
+
+.theme-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 280px;
+  background-color: var(--surface-0, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 16px;
+  border: 1px solid var(--surface-200, #e9ecef);
+}
+
+:global(.p-dark) .theme-panel {
+  background-color: var(--surface-800, #343a40);
+  border-color: var(--surface-700, #495057);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.panel-section {
+  margin-bottom: 16px;
+}
+
+.panel-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 10px 0;
+  color: var(--surface-700, #495057);
+}
+
+:global(.p-dark) .panel-section h4 {
+  color: var(--surface-300, #dee2e6);
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.theme-button {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-button:hover {
+  transform: scale(1.05);
+}
+
+.theme-button.selected {
+  border-color: white;
+  box-shadow: 0 0 0 2px var(--primary-500, #0078d4);
+}
+
+:global(.p-dark) .theme-button.selected {
+  box-shadow: 0 0 0 2px var(--primary-400, #2b88d8);
+}
+
+.check-icon {
+  color: white;
+  font-size: 14px;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.mode-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  color: var(--surface-600, #6c757d);
+}
+
+:global(.p-dark) .mode-toggle {
+  color: var(--surface-400, #ced4da);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background-color: var(--surface-300, #dee2e6);
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch.on {
+  background-color: var(--primary-500, #0078d4);
+}
+
+.toggle-handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch.on .toggle-handle {
+  left: 22px;
+}
+</style>
