@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@microsoft/load-themed-styles": "^2.0.169",
     "@pnp/graph": "^4.10.0",
     "@pnp/sp": "^4.10.0",
     "@primeuix/themes": "1.0.0",
